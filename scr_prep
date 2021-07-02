@@ -1,0 +1,37 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]
+then
+  echo "Error: Not enough arguments"
+  exit 120
+fi
+
+while S= read -r line
+do
+  str=$(echo $line | grep -Eo '\$[a-z,A-Z,0-9,_]*')
+  if [ -n "$str" ]
+  then
+    if [ -z "$(sed -n "/$(echo ${str:1})=/p" $1)" ]
+    then
+      #sed -n "/$(echo ${str:1})=/p" $1
+      #echo ${str:1}
+      echo "Error: variable is not initialized"
+      exit 123
+    fi
+  fi
+done < $1
+
+cp -f $1 $2
+
+
+for jk in $(sed -n "/[A-Z,a-z,_]*=/p" $2 | cut -d "=" -f 1)
+do
+  sed -i -e "s/\$$jk/$(sed -n "/$jk=/p" $2 | cut -d "=" -f 2)/g" $2
+done
+
+
+
+#sed -e "s/\$$jk/$(sed -n "/$jk=/p" net_scr2 | cut -d "=" -f 2)/g" net_scr2 > net_src_t
+
+
+#echo $line | grep -Eo '\$[a-z,A-Z,0-9,_]*'
